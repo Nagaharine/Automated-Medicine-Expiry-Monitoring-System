@@ -6,7 +6,8 @@
 <title>Sales Analytics | MediTrack</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 
 *{
@@ -162,32 +163,204 @@ font-size:13px;
 </div>
 
 <div class="container">
-    <div class="glass-card">
-        <h2>Sales Analytics Dashboard</h2>
-        <form method="GET" action="/sales-prediction" style="margin: 20px 0; display:flex; gap:10px;">
-            <input type="text" name="search" placeholder="Search medicine..." style="flex:1; padding:10px; border-radius:8px; border:none;">
-            <button type="submit" style="padding:10px 20px; background:var(--accent); color:white; border:none; border-radius:8px;">Analyze</button>
-        </form>
 
-        <div class="stats-grid">
-            <div class="stat-box"><h3>{{ total_sales }}</h3><p>Units Sold</p></div>
-            <div class="stat-box"><canvas id="demandChart"></canvas></div>
-            <div class="stat-box"><canvas id="pieChart"></canvas></div>
-        </div>
-    </div>
+<h2 class="page-title">Medicine Sales Analytics & Prediction</h2>
+{% if is_search %}
+<div style="
+background:#fee2e2;
+color:#991b1b;
+padding:12px;
+border-radius:8px;
+margin-bottom:20px;
+font-weight:600;
+">
+Focused Analytics for "{{ search }}"
+</div>
+{% endif %}
+<div style="margin-bottom:25px; display:flex; gap:10px;">
+
+<form method="GET" action="/sales-prediction" style="display:flex; gap:10px; width:100%;">
+
+<input type="text" name="search" placeholder="Search Medicine..." 
+value="{{ search if search else '' }}"
+style="flex:1; padding:10px; border-radius:8px; border:1px solid #cbd5e1;">
+
+<button type="submit" 
+style="background:#3b82f6; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
+Search
+</button>
+
+<a href="/sales-prediction" 
+style="padding:10px 15px; background:#e2e8f0; border-radius:8px; text-decoration:none;">
+Clear
+</a>
+
+</form>
+
+</div>
+<!-- STATISTICS -->
+
+<div class="stats-grid">
+
+<div class="stat-card">
+<p>Total Sales Quantity</p>
+<h2>{{ total_sales }}</h2>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script>
-    const medNames = JSON.parse('{{ med_names | safe }}');
-    const medSales = JSON.parse('{{ med_sales | safe }}');
+<div class="stat-card">
+<p>Total Medicines</p>
+<h2>{{ med_names|length }}</h2>
+</div>
 
-    new Chart(document.getElementById("demandChart"), {
-        type: 'bar',
-        data: {
-            labels: medNames,
-            datasets: [{ label: 'Demand', data: medSales, backgroundColor: '#3b82f6', borderRadius: 5 }]
-        },
-        options: { plugins: { legend: { display: false } }, scales: { y: { ticks: { color: 'white' } } } }
-    });
+<div class="stat-card">
+<p>Most Demanded Medicine</p>
+<h2>{{ med_names[0] if med_names else 'N/A' }}</h2>
+</div>
+
+</div>
+
+<!-- TABLE -->
+
+<div class="table-card">
+
+<h3>Medicine Demand Prediction</h3>
+
+<table>
+
+<tr>
+<th>Medicine Name</th>
+<th>Total Sales</th>
+</tr>
+
+{% for row in prediction %}
+
+{% if not prediction %}
+<tr>
+<td colspan="2" style="text-align:center; color:#94a3b8; padding:20px;">
+No data found for this medicine
+</td>
+</tr>
+{% endif %}
+
+<tr>
+<td>{{ row.medicine_name }}</td>
+<td>
+{{ row.total_sales if row.total_sales > 0 else "0 (No Sales Data)" }}
+</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+<!-- CHARTS -->
+
+<div class="chart-grid">
+
+<div class="chart-card">
+
+<h3>Medicine Demand Graph</h3>
+<canvas id="demandChart"></canvas>
+
+</div>
+
+<div class="chart-card">
+
+<h3>Sales Distribution</h3>
+<canvas id="pieChart"></canvas>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+MediTrack Analytics Dashboard
+</div>
+
+<script>
+
+var medicines = {{ med_names | safe }};
+var sales = {{ med_sales | safe }};
+
+{% if is_search %}
+
+/* 🎯 SPECIAL CHART FOR SEARCHED MEDICINE */
+
+new Chart(document.getElementById("demandChart"),{
+
+type:'bar',
+
+data:{
+labels:medicines,
+datasets:[{
+label:'Selected Medicine Analytics',
+data:sales,
+backgroundColor:'#ef4444',   // RED highlight
+borderRadius:10,
+barThickness:80
+}]
+},
+
+options:{
+plugins:{
+legend:{display:true}
+},
+scales:{
+y:{
+beginAtZero:true
+}
+}
+}
+
+});
+
+{% else %}
+
+/* NORMAL CHART */
+
+new Chart(document.getElementById("demandChart"),{
+
+type:'bar',
+
+data:{
+labels:medicines,
+datasets:[{
+label:'Sales Quantity',
+data:sales,
+backgroundColor:'#3b82f6'
+}]
+}
+
+});
+
+{% endif %}
+
+
+/* PIE CHART (same for both) */
+
+new Chart(document.getElementById("pieChart"),{
+
+type:'pie',
+
+data:{
+labels:medicines,
+datasets:[{
+data:sales,
+backgroundColor:[
+'#3b82f6',
+'#10b981',
+'#f59e0b',
+'#ef4444',
+'#6366f1'
+]
+}]
+}
+
+});
+
 </script>
+
