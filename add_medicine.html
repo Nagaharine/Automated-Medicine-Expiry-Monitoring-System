@@ -36,7 +36,7 @@
             <a href="/all_medicines">Overview</a>
             <a href="/sales">Sales</a>
             <a href="/expired">Expired</a>
-            <a href="/predict">Predict</a>
+            <a href="/sales-prediction">Prediction</a>
             <a href="/logout" style="color: #f87171;">Logout</a>
         </div>
     </div>
@@ -62,7 +62,6 @@
                     <tr>
                         <th>Medicine Name</th>
                         <th>Batch No</th>
-                        <th>Entry Date</th>
                         <th>Expiry Date</th>
                         <th>Quantity</th>
                         <th>Actions</th>
@@ -73,7 +72,6 @@
                     <tr>
                         <td><strong>{{ med.medicine_name }}</strong></td>
                         <td>{{ med.batch_no }}</td>
-                        <td>{{ med.entry_date }}</td>
                         <td>{{ med.expiry_date }}</td>
                         <td>{{ med.quantity }}</td>
                         <td>
@@ -92,7 +90,6 @@
             document.getElementById('medicine_id').value = id;
             document.getElementById('name').value = name;
             document.getElementById('batch').value = batch;
-            document.getElementById('entry').value = entry;
             document.getElementById('expiry').value = expiry;
             document.getElementById('qty').value = qty;
             
